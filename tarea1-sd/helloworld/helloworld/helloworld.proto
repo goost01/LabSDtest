@@ -1,0 +1,110 @@
+// Copyright 2015 gRPC authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+option go_package = "lab1/game/helloworld";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.helloworld";
+option java_outer_classname = "HelloWorldProto";
+
+package helloworld;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  // Sends another greeting
+  rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+
+service Game {
+
+    
+    // Sends Join game
+    rpc JoinGame (JoinRequest) returns (JoinReply) { }
+
+    rpc BeginGame (BeginRequest) returns (BeginReply) { }
+    // Sends end game
+    rpc EndGame (EndRequest) returns (EndReply) { }
+
+    // Begin Stage
+    rpc BeginStageE1 (BeginStageRequest) returns (BeginStageReply) { } 
+    rpc BeginStageE2 (BeginStageRequest) returns (BeginStageReply) { }
+    rpc BeginStageE3 (BeginStageRequest) returns (BeginStageReply) { }
+
+    rpc SendJugadaE1(JugadaE1) returns (PlayerStatusE1) { }
+}
+
+// The request message
+message JoinRequest {
+    string message = 1;
+    string name = 2;
+}
+
+// The response message
+message JoinReply {
+  string message = 1;
+}
+
+message BeginRequest {
+  string message = 1;
+}
+
+message BeginReply {
+    bool message = 1;
+    int32 online = 2;
+}
+
+// End request message
+message EndRequest {
+    string message = 1;
+}
+
+// End reply message
+message EndReply {
+  string message = 2;
+}
+
+// BeginStageRequest
+message BeginStageRequest {
+  string stage = 1; // enviar la etapa
+}
+
+// BeginStageReply
+message BeginStageReply {
+  bool stage = 1;
+}
+
+// JugadaE1
+message JugadaE1 {
+  int32 jugada = 1;
+  int32 suma_actual = 2;
+}
+
+message PlayerStatusE1 {
+  int32 suma_total = 1;
+  bool dead = 2;
+  int32 ronda = 3;
+}
