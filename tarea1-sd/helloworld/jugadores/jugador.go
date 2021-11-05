@@ -25,7 +25,7 @@ import (
  * 	Enviar  sus  jugadas  en  cada  ronda  de  cada  etapa. En  caso  de  ser  eliminado,  debe  ﬁnalizar  el  proceso.
 */
 
-func Jugador(client pb.GameClient, num_jug int32) {
+func Jugador() {
 
 	return
 }
@@ -40,7 +40,6 @@ func main() {
 	// Crear un gRPC canal para comunicarse con el servidor
 	// 	-> Esto se crea pasando server address y port number a grpc.Dial()
 
-	// Configurar conexión al server
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 
 	if err != nil {
@@ -54,10 +53,13 @@ func main() {
 	message := "HOLA deseo unirme a the game"
 	// Contact the server and print out its response.
 	name := "Jugador 1"
+	var id int32 = 0
 	ctx := context.Background()
 	//ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	r, err := client.JoinGame(ctx, &pb.JoinRequest{Message: message, Name: name})
-
+	r, err := client.JoinGame(ctx, &pb.JoinRequest{Id: id, Message: message, Name: name})
+	
+	id = r.GetId()
+	
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -68,13 +70,13 @@ func main() {
 	for !comienzaeljuego {
 		time.Sleep(5 * time.Second)
 		message := "Ya comienza el juego??"
-		r, err := client.BeginGame(ctx, &pb.BeginRequest{Message: message})
+		r, err := client.BeginGame(ctx, &pb.BeginRequest{Id: id, Message: message})
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
 		comienzaeljuego = r.GetMessage()
 		Jugadoresonline := r.GetOnline()
-		fmt.Println(">> Jugadores online: %i", Jugadoresonline)
+		fmt.Println(">> Jugadores online: %d", Jugadoresonline)
 	}
 
 	// SOLICITUD A LA PRIMERA ETAPA
@@ -83,8 +85,8 @@ func main() {
 
 	for !comienzalaetapa {
 
-		time.Sleep(5 * time.Second)
-		r, err := client.BeginStageE1(ctx, &pb.BeginStageRequest{Stage: stage})
+		time.Sleep(10 * time.Second)
+		r, err := client.BeginStage(ctx, &pb.BeginStageRequest{Id: id , Stage: stage})
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
@@ -95,28 +97,81 @@ func main() {
 	//COMIENZA LA PRIMERA ETAPA
 	var suma_actual int32 = 0
 	dead := false
+	var newEtapa bool = true
 	// Loop de rondas
-
-	for !dead {
+	for newEtapa {
+		
 		var numero int
 		fmt.Println("Ingrese su jugada:")
 		_, err =  fmt.Scanf("%d",&numero)
 		jugada := int32(numero)
-		suma_actual = int32(suma_actual) + jugada
-		r, err := client.SendJugadaE1(ctx, &pb.JugadaE1{Jugada: jugada, SumaActual: suma_actual})
+		
+		r, err := client.SendJugadaE1(ctx, &pb.JugadaE1{Id: id, Jugada: jugada, SumaActual: suma_actual})
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
 		dead = r.GetDead()
+		if dead{
+			fmt.Println("Has muerto...")
+			
+		}
 		suma_actual = r.GetSumaTotal()
 		ronda := r.GetRonda()
 		fmt.Println("Suma total %d ronda: %d",suma_actual, ronda)
+		if ronda == 4 {
+			newEtapa = false
+		}
+		var newRound bool = false	
+		for !newRound{
+			fmt.Println("Aun no comienza la ronda")
+			time.Sleep(5*time.Second)
+			response,err := client.BeginRound(ctx, &pb.PingMsg{Id: id})
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+			newRound = response.GetRound()
+			
+		}
 		
 	}
+	var action string
+	fmt.Println("Ingrese accion: play = comenzar nueva etapa; check = ver pozo")
+	
+	comienzalaetapa = false
+	for !comienzalaetapa {
+		fmt.Scanln(&action)
+		if action == "play"{
+			r, err := client.BeginStage(ctx, &pb.BeginStageRequest{Id: id , Stage: stage})
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+			comienzalaetapa = r.GetStage()
+			
+		}
 
-	fmt.Println("Comienza Squid Game.")
+	}
+	fmt.Println("Comienza la ronda 2.")
+	newEtapa = false
+	for !newEtapa {
+		
+		var numero int
+		fmt.Println("Ingrese su jugada:")
+		_, err =  fmt.Scanf("%d",&numero)
+		//jugada := int32(numero)
+		
+		/*r, err := client.SendJugadaE2(ctx, &pb.JugadaE1{Id: id, Jugada: jugada, SumaActual: suma_actual})
+		if err != nil {
+			log.Fatalf("could not greet: %v", err)
+		}
+		dead = r.GetDead()
+		if dead{
+			fmt.Println("Has muerto...")
+			
+		}*/
+
+	// Configurar conexión al server
 	//go Jugador(16)
-
+	}
 	return
-
+		
 }

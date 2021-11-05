@@ -22,22 +22,6 @@ option java_outer_classname = "HelloWorldProto";
 package helloworld;
 
 // The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
-  // Sends another greeting
-  rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
-}
-
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
-}
-
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
-}
 
 service Game {
 
@@ -50,61 +34,90 @@ service Game {
     rpc EndGame (EndRequest) returns (EndReply) { }
 
     // Begin Stage
-    rpc BeginStageE1 (BeginStageRequest) returns (BeginStageReply) { } 
-    rpc BeginStageE2 (BeginStageRequest) returns (BeginStageReply) { }
-    rpc BeginStageE3 (BeginStageRequest) returns (BeginStageReply) { }
+    rpc BeginStage (BeginStageRequest) returns (BeginStageReply) { } 
+
+    rpc BeginRound (PingMsg) returns (BeginRoundReply) { }
 
     rpc SendJugadaE1(JugadaE1) returns (PlayerStatusE1) { }
+    
+    rpc SendJugadaE2(JugadaE2) returns (PingMsg) { }
+    rpc IsAlready(PingMsg) returns (PlayerStatusE2) {}
 }
+message PingMsg {
+  int32 id = 1;
 
+}
 // The request message
 message JoinRequest {
-    string message = 1;
-    string name = 2;
+    int32 id = 1;
+    string message = 2;
+    string name = 3;
 }
 
 // The response message
 message JoinReply {
-  string message = 1;
+  int32 id = 1;
+  string message = 2;
 }
 
 message BeginRequest {
-  string message = 1;
+  int32 id = 1;
+  string message = 2;
 }
 
 message BeginReply {
-    bool message = 1;
-    int32 online = 2;
+  bool message = 1;
+  int32 online = 2;
 }
 
 // End request message
 message EndRequest {
-    string message = 1;
+  int32 id = 1;
+  string message = 2;
 }
 
 // End reply message
 message EndReply {
-  string message = 2;
+  string message = 1;
 }
 
 // BeginStageRequest
 message BeginStageRequest {
-  string stage = 1; // enviar la etapa
+  int32 id = 1;
+  string stage = 2; // enviar la etapa
 }
 
 // BeginStageReply
 message BeginStageReply {
   bool stage = 1;
+  bool dead = 2;
+}
+
+
+// BeginRoundReply
+message BeginRoundReply {
+  bool round = 1;
 }
 
 // JugadaE1
 message JugadaE1 {
-  int32 jugada = 1;
-  int32 suma_actual = 2;
+  int32 id = 1;
+  int32 jugada = 2;
+  int32 suma_actual = 3;
 }
+
 
 message PlayerStatusE1 {
   int32 suma_total = 1;
   bool dead = 2;
   int32 ronda = 3;
+}
+
+message JugadaE2 {
+  int32 id = 1;
+  int32 jugada = 2;
+}
+message PlayerStatusE2{
+  bool ready = 1;
+  bool dead = 2;
 }

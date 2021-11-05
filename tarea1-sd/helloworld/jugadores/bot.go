@@ -16,6 +16,7 @@ func Bot(ctx ,client pb.GameClient, num_jug int) {
 	client.
 
 	return
+
 }
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 	// Client Stub to perform RPCs
 	client := pb.NewGameClient(conn)
 
-	ctx := 
+	ctx :=
 
 	for i := 1; i < 16; i++ {
 		go Bot(client, i)

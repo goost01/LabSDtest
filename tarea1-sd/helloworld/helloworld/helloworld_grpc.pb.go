@@ -14,132 +14,6 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// GreeterClient is the client API for Greeter service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type GreeterClient interface {
-	// Sends a greeting
-	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
-	// Sends another greeting
-	SayHelloAgain(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
-}
-
-type greeterClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewGreeterClient(cc grpc.ClientConnInterface) GreeterClient {
-	return &greeterClient{cc}
-}
-
-func (c *greeterClient) SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error) {
-	out := new(HelloReply)
-	err := c.cc.Invoke(ctx, "/helloworld.Greeter/SayHello", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *greeterClient) SayHelloAgain(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error) {
-	out := new(HelloReply)
-	err := c.cc.Invoke(ctx, "/helloworld.Greeter/SayHelloAgain", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// GreeterServer is the server API for Greeter service.
-// All implementations must embed UnimplementedGreeterServer
-// for forward compatibility
-type GreeterServer interface {
-	// Sends a greeting
-	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
-	// Sends another greeting
-	SayHelloAgain(context.Context, *HelloRequest) (*HelloReply, error)
-	mustEmbedUnimplementedGreeterServer()
-}
-
-// UnimplementedGreeterServer must be embedded to have forward compatible implementations.
-type UnimplementedGreeterServer struct {
-}
-
-func (UnimplementedGreeterServer) SayHello(context.Context, *HelloRequest) (*HelloReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
-}
-func (UnimplementedGreeterServer) SayHelloAgain(context.Context, *HelloRequest) (*HelloReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SayHelloAgain not implemented")
-}
-func (UnimplementedGreeterServer) mustEmbedUnimplementedGreeterServer() {}
-
-// UnsafeGreeterServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to GreeterServer will
-// result in compilation errors.
-type UnsafeGreeterServer interface {
-	mustEmbedUnimplementedGreeterServer()
-}
-
-func RegisterGreeterServer(s grpc.ServiceRegistrar, srv GreeterServer) {
-	s.RegisterService(&Greeter_ServiceDesc, srv)
-}
-
-func _Greeter_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HelloRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GreeterServer).SayHello(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/helloworld.Greeter/SayHello",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GreeterServer).SayHello(ctx, req.(*HelloRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Greeter_SayHelloAgain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HelloRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GreeterServer).SayHelloAgain(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/helloworld.Greeter/SayHelloAgain",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GreeterServer).SayHelloAgain(ctx, req.(*HelloRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// Greeter_ServiceDesc is the grpc.ServiceDesc for Greeter service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Greeter_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "helloworld.Greeter",
-	HandlerType: (*GreeterServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SayHello",
-			Handler:    _Greeter_SayHello_Handler,
-		},
-		{
-			MethodName: "SayHelloAgain",
-			Handler:    _Greeter_SayHelloAgain_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "helloworld/helloworld.proto",
-}
-
 // GameClient is the client API for Game service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
@@ -150,10 +24,11 @@ type GameClient interface {
 	// Sends end game
 	EndGame(ctx context.Context, in *EndRequest, opts ...grpc.CallOption) (*EndReply, error)
 	// Begin Stage
-	BeginStageE1(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error)
-	BeginStageE2(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error)
-	BeginStageE3(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error)
+	BeginStage(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error)
+	BeginRound(ctx context.Context, in *PingMsg, opts ...grpc.CallOption) (*BeginRoundReply, error)
 	SendJugadaE1(ctx context.Context, in *JugadaE1, opts ...grpc.CallOption) (*PlayerStatusE1, error)
+	SendJugadaE2(ctx context.Context, in *JugadaE2, opts ...grpc.CallOption) (*PingMsg, error)
+	IsAlready(ctx context.Context, in *PingMsg, opts ...grpc.CallOption) (*PlayerStatusE2, error)
 }
 
 type gameClient struct {
@@ -191,27 +66,18 @@ func (c *gameClient) EndGame(ctx context.Context, in *EndRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *gameClient) BeginStageE1(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error) {
+func (c *gameClient) BeginStage(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error) {
 	out := new(BeginStageReply)
-	err := c.cc.Invoke(ctx, "/helloworld.Game/BeginStageE1", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/helloworld.Game/BeginStage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *gameClient) BeginStageE2(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error) {
-	out := new(BeginStageReply)
-	err := c.cc.Invoke(ctx, "/helloworld.Game/BeginStageE2", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *gameClient) BeginStageE3(ctx context.Context, in *BeginStageRequest, opts ...grpc.CallOption) (*BeginStageReply, error) {
-	out := new(BeginStageReply)
-	err := c.cc.Invoke(ctx, "/helloworld.Game/BeginStageE3", in, out, opts...)
+func (c *gameClient) BeginRound(ctx context.Context, in *PingMsg, opts ...grpc.CallOption) (*BeginRoundReply, error) {
+	out := new(BeginRoundReply)
+	err := c.cc.Invoke(ctx, "/helloworld.Game/BeginRound", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -221,6 +87,24 @@ func (c *gameClient) BeginStageE3(ctx context.Context, in *BeginStageRequest, op
 func (c *gameClient) SendJugadaE1(ctx context.Context, in *JugadaE1, opts ...grpc.CallOption) (*PlayerStatusE1, error) {
 	out := new(PlayerStatusE1)
 	err := c.cc.Invoke(ctx, "/helloworld.Game/SendJugadaE1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameClient) SendJugadaE2(ctx context.Context, in *JugadaE2, opts ...grpc.CallOption) (*PingMsg, error) {
+	out := new(PingMsg)
+	err := c.cc.Invoke(ctx, "/helloworld.Game/SendJugadaE2", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameClient) IsAlready(ctx context.Context, in *PingMsg, opts ...grpc.CallOption) (*PlayerStatusE2, error) {
+	out := new(PlayerStatusE2)
+	err := c.cc.Invoke(ctx, "/helloworld.Game/IsAlready", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -237,10 +121,11 @@ type GameServer interface {
 	// Sends end game
 	EndGame(context.Context, *EndRequest) (*EndReply, error)
 	// Begin Stage
-	BeginStageE1(context.Context, *BeginStageRequest) (*BeginStageReply, error)
-	BeginStageE2(context.Context, *BeginStageRequest) (*BeginStageReply, error)
-	BeginStageE3(context.Context, *BeginStageRequest) (*BeginStageReply, error)
+	BeginStage(context.Context, *BeginStageRequest) (*BeginStageReply, error)
+	BeginRound(context.Context, *PingMsg) (*BeginRoundReply, error)
 	SendJugadaE1(context.Context, *JugadaE1) (*PlayerStatusE1, error)
+	SendJugadaE2(context.Context, *JugadaE2) (*PingMsg, error)
+	IsAlready(context.Context, *PingMsg) (*PlayerStatusE2, error)
 	mustEmbedUnimplementedGameServer()
 }
 
@@ -257,17 +142,20 @@ func (UnimplementedGameServer) BeginGame(context.Context, *BeginRequest) (*Begin
 func (UnimplementedGameServer) EndGame(context.Context, *EndRequest) (*EndReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndGame not implemented")
 }
-func (UnimplementedGameServer) BeginStageE1(context.Context, *BeginStageRequest) (*BeginStageReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BeginStageE1 not implemented")
+func (UnimplementedGameServer) BeginStage(context.Context, *BeginStageRequest) (*BeginStageReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BeginStage not implemented")
 }
-func (UnimplementedGameServer) BeginStageE2(context.Context, *BeginStageRequest) (*BeginStageReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BeginStageE2 not implemented")
-}
-func (UnimplementedGameServer) BeginStageE3(context.Context, *BeginStageRequest) (*BeginStageReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BeginStageE3 not implemented")
+func (UnimplementedGameServer) BeginRound(context.Context, *PingMsg) (*BeginRoundReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BeginRound not implemented")
 }
 func (UnimplementedGameServer) SendJugadaE1(context.Context, *JugadaE1) (*PlayerStatusE1, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendJugadaE1 not implemented")
+}
+func (UnimplementedGameServer) SendJugadaE2(context.Context, *JugadaE2) (*PingMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendJugadaE2 not implemented")
+}
+func (UnimplementedGameServer) IsAlready(context.Context, *PingMsg) (*PlayerStatusE2, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsAlready not implemented")
 }
 func (UnimplementedGameServer) mustEmbedUnimplementedGameServer() {}
 
@@ -336,56 +224,38 @@ func _Game_EndGame_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Game_BeginStageE1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Game_BeginStage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BeginStageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GameServer).BeginStageE1(ctx, in)
+		return srv.(GameServer).BeginStage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/helloworld.Game/BeginStageE1",
+		FullMethod: "/helloworld.Game/BeginStage",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GameServer).BeginStageE1(ctx, req.(*BeginStageRequest))
+		return srv.(GameServer).BeginStage(ctx, req.(*BeginStageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Game_BeginStageE2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BeginStageRequest)
+func _Game_BeginRound_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GameServer).BeginStageE2(ctx, in)
+		return srv.(GameServer).BeginRound(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/helloworld.Game/BeginStageE2",
+		FullMethod: "/helloworld.Game/BeginRound",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GameServer).BeginStageE2(ctx, req.(*BeginStageRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Game_BeginStageE3_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BeginStageRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GameServer).BeginStageE3(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/helloworld.Game/BeginStageE3",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GameServer).BeginStageE3(ctx, req.(*BeginStageRequest))
+		return srv.(GameServer).BeginRound(ctx, req.(*PingMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -404,6 +274,42 @@ func _Game_SendJugadaE1_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GameServer).SendJugadaE1(ctx, req.(*JugadaE1))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Game_SendJugadaE2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JugadaE2)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).SendJugadaE2(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/helloworld.Game/SendJugadaE2",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).SendJugadaE2(ctx, req.(*JugadaE2))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Game_IsAlready_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).IsAlready(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/helloworld.Game/IsAlready",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).IsAlready(ctx, req.(*PingMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -428,20 +334,24 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Game_EndGame_Handler,
 		},
 		{
-			MethodName: "BeginStageE1",
-			Handler:    _Game_BeginStageE1_Handler,
+			MethodName: "BeginStage",
+			Handler:    _Game_BeginStage_Handler,
 		},
 		{
-			MethodName: "BeginStageE2",
-			Handler:    _Game_BeginStageE2_Handler,
-		},
-		{
-			MethodName: "BeginStageE3",
-			Handler:    _Game_BeginStageE3_Handler,
+			MethodName: "BeginRound",
+			Handler:    _Game_BeginRound_Handler,
 		},
 		{
 			MethodName: "SendJugadaE1",
 			Handler:    _Game_SendJugadaE1_Handler,
+		},
+		{
+			MethodName: "SendJugadaE2",
+			Handler:    _Game_SendJugadaE2_Handler,
+		},
+		{
+			MethodName: "IsAlready",
+			Handler:    _Game_IsAlready_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
